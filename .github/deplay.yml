@@ -1,4 +1,4 @@
-name: Deploy Spring Boot to EC2
+name: Deplay Spring Boot to EC2
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  build-and-deploy:
+  build-and-deplay:
     runs-on: ubuntu-latest
 
     steps:
@@ -44,7 +44,7 @@ jobs:
         source: "final/build/libs/myapp.jar"
         target: "/home/ubuntu/app"
         
-    - name: Run deploy script on EC2
+    - name: Run deplay script on EC2
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -52,5 +52,5 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           cd /home/ubuntu/app
-          chmod +x deploy.sh
-          ./deploy.sh
+          chmod +x deplay.sh
+          ./deplay.sh
