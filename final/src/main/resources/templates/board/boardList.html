@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{fragments/defaultLayout}">
+	<head th:with="layoutTitle='게시글목록'">
+		<meta charset="utf-8">
+		<title>게시글 목록</title>
+	</head>
+	<body>
+		<div layout:fragment="content">
+			
+		<h1 align="center">게시글 목록</h1>
+		<hr>
+		<table align="center" border="1" width="700">
+			<tr>
+				<th bgcolor="orange" width="10%">번호</th>
+				<th bgcolor="orange" width="10%">제목</th>
+				<th bgcolor="orange" width="10%">작성자</th>
+				<th bgcolor="orange" width="10%">작성일자</th>
+				<th bgcolor="orange" width="10%">조회수</th>
+			</tr>
+			<tr th:each="board:${myboardList}">
+				<td th:text="${board.articleNo}" align="center"></td>
+				<td align="center">
+					<a th:text="${board.title}" th:href=
+					"@{/board/getBoard(articleNo=${board.articleNo})}">
+					</a>
+				</td>
+				<td th:text="${board.id}" align="center"></td>
+				<td th:text="${board.writeDate}" align="center"></td>
+				<td th:text="${board.viewCount}" align="center"></td>
+			</tr>
+		</table>
+		<h3 align="center">
+			<a th:href="@{/board/insertBoard}">게시글 등록</a>
+		</h3>
+		</div>
+	</body>
+</html>

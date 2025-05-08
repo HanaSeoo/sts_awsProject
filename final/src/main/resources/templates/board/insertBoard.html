@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org"
+xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{fragments/defaultLayout}">
+
+<head th:with="layoutTitle='새글등록'">
+	<meta charset="utf-8">
+	<title>새글 등록</title>
+	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+		<script type="text/javascript">
+			// Teachable Machine 모델 관련 변수
+			// URL 경로 수정 - 절대 경로 사용
+			const URL = "/my_model/";
+			let model, maxPredictions;
+			let isModelLoaded = false;
+
+			// 페이지 로드 시 모델 초기화
+			window.addEventListener('DOMContentLoaded', async () => {
+				try {
+					await loadModel();
+				} catch (error) {
+					console.error("모델 로딩 중 오류 발생:", error);
+					// 오류 메시지 더 자세히 표시
+					console.error("오류 상세:", error.message);
+					console.error("오류 스택:", error.stack);
+					alert("모델 로딩에 실패했습니다. 개발자 도구의 콘솔을 확인해주세요.");
+				}
+			});
+
+			// 모델 로드 함수
+			async function loadModel() {
+				const modelURL = URL + "model.json";
+				const metadataURL = URL + "metadata.json";
+
+				console.log("모델 URL:", modelURL);
+				console.log("메타데이터 URL:", metadataURL);
+
+				try {
+					// 옵션 파라미터 추가
+					model = await tmImage.load(modelURL, metadataURL);
+					maxPredictions = model.getTotalClasses();
+					isModelLoaded = true;
+					console.log("모델 로딩 완료");
+					console.log("클래스 수:", maxPredictions);
+
+					// 라벨 컨테이너 초기화
+					const labelContainer = document.getElementById("label-container");
+					labelContainer.innerHTML = ""; // 기존 내용 제거
+
+					for (let i = 0; i < maxPredictions; i++) {
+						labelContainer.appendChild(document.createElement("div"));
+					}
+				} catch (error) {
+					console.error("모델 로딩 오류:", error);
+					// 모델 파일 존재 확인 시도
+					try {
+						const response = await fetch(modelURL);
+						console.log("모델 파일 응답 상태:", response.status);
+						if (!response.ok) {
+							console.error("모델 파일을 찾을 수 없습니다:", response.statusText);
+						}
+					} catch (fetchError) {
+						console.error("모델 파일 확인 중 오류:", fetchError);
+					}
+					throw error;
+				}
+			}
+
+			// 이미지 프리뷰 표시
+			function previewImage() {
+				const fileInput = document.getElementById('imageInput');
+				const imagePreview = document.getElementById('image-preview');
+				const analyzeButton = document.getElementById('analyzeButton');
+
+				if (fileInput.files && fileInput.files[0]) {
+					const reader = new FileReader();
+
+					reader.onload = function (e) {
+						imagePreview.src = e.target.result;
+						imagePreview.style.display = 'block';
+						analyzeButton.style.display = 'inline-block';
+					};
+
+					reader.readAsDataURL(fileInput.files[0]);
+				}
+			}
+
+			// 예측 실행 함수
+			async function predictImage() {
+				if (!isModelLoaded) {
+					alert("모델이 아직 로딩 중입니다. 잠시 후 다시 시도해주세요.");
+					return;
+				}
+
+				const imagePreview = document.getElementById('image-preview');
+				const predictionContainer = document.getElementById('prediction-container');
+				const predictionJsonInput = document.getElementById('predictionJson');
+
+				try {
+					// 이미지 분석 실행
+					const predictions = await model.predict(imagePreview);
+
+					// 결과 표시
+					const labelContainer = document.getElementById("label-container");
+					const predictionResults = [];
+
+					for (let i = 0; i < maxPredictions; i++) {
+						const classPrediction =
+							predictions[i].className + ": " + predictions[i].probability.toFixed(2);
+						labelContainer.childNodes[i].innerHTML = classPrediction;
+
+						// JSON 데이터용 객체 저장
+						predictionResults.push({
+							className: predictions[i].className,
+							probability: predictions[i].probability.toFixed(2)
+						});
+					}
+
+					// JSON 데이터 저장
+					const predictionData = JSON.stringify(predictionResults);
+					predictionJsonInput.value = predictionData;
+
+					// 결과 컨테이너 표시
+					predictionContainer.style.display = "block";
+
+					return predictionResults;
+				} catch (error) {
+					console.error("예측 중 오류 발생:", error);
+					alert("이미지 분석 중 오류가 발생했습니다.");
+				}
+			}
+
+			// 분석 버튼 이벤트 리스너
+			document.getElementById('analyzeButton').addEventListener('click', async () => {
+				const results = await predictImage();
+				console.log("예측 결과:", results);
+			});
+
+			// 폼 제출 시 예측 데이터 포함
+			document.getElementById('boardForm').addEventListener('submit', async function (e) {
+				// 이미지가 선택되었고 아직 분석되지 않았다면 분석 실행
+				const imageInput = document.getElementById('imageInput');
+				const predictionJsonInput = document.getElementById('predictionJson');
+
+				if (imageInput.files.length > 0 && !predictionJsonInput.value) {
+					e.preventDefault(); // 폼 제출 중단
+
+					const results = await predictImage();
+					if (results) {
+						// 분석 후 폼 수동 제출
+						this.submit();
+					}
+				}
+			});
+		</script>
+	<style>
+		#prediction-container {
+			margin-top: 20px;
+			padding: 10px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			display: none;
+		}
+
+		#image-preview {
+			max-width: 200px;
+			max-height: 200px;
+			margin-top: 10px;
+		}
+	</style>
+</head>
+
+<body>
+	<h3 align="center">게시글 등록</h3>
+	<form method="post" enctype="multipart/form-data" id="boardForm">
+		<table border="1" align="center" width="700" layout:fragment="content">
+			<tr align="center">
+				<th bgcolor="orange" width="30%">제목</th>
+				<td width="40%"><input type="text" name="title" size="20"></td>
+			</tr>
+			<tr align="center">
+				<th bgcolor="orange">작성자</th>
+				<td><input type="text" name="id" th:value="${loginId}" size="20"></td>
+			</tr>
+			<tr align="center">
+				<th bgcolor="orange">내용</th>
+				<td>
+					<textarea name="content" cols="22" rows="10"></textarea>
+				</td>
+			</tr>
+			<tr align="center">
+				<th bgcolor="orange">파일</th>
+				<td>
+					<input type="file" id="imageInput" name="files" accept="image/*" onchange="previewImage()">
+					<div id="image-preview-container">
+						<img id="image-preview" style="display:none;">
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th colspan="2">
+					<input type="submit" value="게시글 등록">
+					<button type="button" id="analyzeButton" style="display:none;">이미지 분석하기</button>
+				</th>
+			</tr>
+		</table>
+	</form>
+
+	<div id="prediction-container" align="center">
+		<h4>이미지 분석 결과</h4>
+		<div id="label-container"></div>
+		<input type="hidden" id="predictionJson" name="predictionData">
+	</div>
+
+	<div align="center">
+		<a href="/board/boardList">글 목록</a>
+	</div>
+
+
+</body>
+
+</html>

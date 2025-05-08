@@ -33,7 +33,7 @@ jobs:
     - name: Rename JAR file
       run: |
         JAR_FILE=$(ls final/build/libs/*.jar | head -n 1)
-        mv "$JAR_FILE" pro05/build/libs/myapp.jar
+        mv "$JAR_FILE" final/build/libs/myapp.jar
         
     - name: Upload JAR to EC2
       uses: appleboy/scp-action@v0.1.7
