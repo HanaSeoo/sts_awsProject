@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{fragments/defaultLayout}">
+	<head th:with="layoutTitle='게시글 상세보기'">
+	<meta charset="utf-8">
+	<title>게시글 상세 보기</title>
+	<script>
+		function deleteBoard(articleNo) {
+			if (confirm("정말 삭제하시겠습니까?")) {
+				document.getElementById('deleteForm').submit();
+			}
+		}
+	</script>
+</head>
+
+<body>
+	<h1 align="center">게시글 상세 보기</h1>
+
+	<!-- 폼 1: 게시글 수정용 -->
+	<div layout:fragment="content">
+	<form id="modifyForm" method="post" th:action="@{/board/modBoard}">
+		<input type="hidden" name="articleNo" th:value="${board.articleNo}">
+		<table border="1">
+			<tr>
+				<th bgcolor="orange" width="20%">글번호</th>
+				<td th:text="${board.articleNo}" width="80%"></td>
+			</tr>
+			<tr>
+				<th bgcolor="orange">제목</th>
+				<td><input type="text" name="title" th:value="${board.title}"></td>
+			</tr>
+			<tr>
+				<th bgcolor="orange">작성자</th>
+				<td th:text="${board.id}"></td>
+			</tr>
+			<tr>
+				<th bgcolor="orange">내용</th>
+				<td><textarea name="content" cols="50" rows="10" th:text="${board.content}"></textarea></td>
+			</tr>
+			<tr>
+				<th bgcolor="orange">등록일</th>
+				<td th:text="${board.writeDate}"></td>
+			</tr>
+			<tr>
+				<th bgcolor="orange">조회수</th>
+				<td th:text="${board.viewCount}"></td>
+			</tr>
+
+			<tr align="center">
+				<th bgcolor="orange">파일</th>
+				<td>
+					<div th:each="file:${fileList}">
+						<a th:href="@{'/files/' + ${board.articleNo} + '/' + ${file.fileName}}">
+							<img th:src="@{'/files/'+ ${board.articleNo} + '/' + ${file.fileName}}" width="100">
+						</a>
+					</div>
+				</td>
+			</tr>
+
+			<tr>
+				<td colspan="2" align="center">
+					<input type="submit" value="글 수정">
+					<button type="button" onclick="deleteBoard()">글 삭제</button>
+					<a th:href="@{/board/boardList}">
+						<button type="button">글 목록</button>
+					</a>
+				</td>
+			</tr>
+		</table>
+	</form>
+
+	<!-- 폼 2: 게시글 삭제용 -->
+	<form id="deleteForm" method="post" th:action="@{/board/delBoard}">
+		<input type="hidden" name="articleNo" th:value="${board.articleNo}">
+	</form>
+	</div>
+</body>
+
+</html>

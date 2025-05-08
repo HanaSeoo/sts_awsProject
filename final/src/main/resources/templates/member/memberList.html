@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{fragments/defaultLayout}">
+	<head th:with="layoutTitle='게시글목록'">
+		<meta charset="utf-8">
+		<title>게시글 목록</title>
+	</head>
+	<body>
+		<div layout:fragment="content">
+		<h1 align="center">게시글 목록</h1>
+		<hr>
+		<table align="center" border="1" width="700">
+			<tr>
+				<th bgcolor="orange" width="10%">아이디</th>
+				<th bgcolor="orange" width="10%">비번</th>
+				<th bgcolor="orange" width="10%">이름</th>
+				<th bgcolor="orange" width="10%">이메일</th>
+				<th bgcolor="orange" width="10%">가입일자</th>
+			</tr>
+			<tr th:each="member:${memberList}">
+				<td align="center">
+									<a th:text="${member.id}" th:href=
+									"@{/member/detailMember(id=${member.id})}">
+									</a>
+								</td>
+				<td align="center" th:text="${member.pwd}">
+				</td>
+				<td th:text="${member.name}" align="center"></td>
+				<td th:text="${member.email}" align="center"></td>
+				<td th:text="${member.joinDate}" align="center"></td>
+			</tr>
+			<tr>
+				<td colspan="5" align="center">
+				<a href="/member/joinMemberForm">회원가입</a>
+				</td>
+			</tr>
+		</table>
+		</div>
+	</body>
+</html>

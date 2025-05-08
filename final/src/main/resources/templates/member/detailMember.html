@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{fragments/defaultLayout}">
+	<head th:with="layoutTitle='회원 정보 수정'">
+<meta charset="utf-8">
+<title>회원 정보 수정</title>
+</head>
+<body>
+	<div layout:fragment="content">
+<h1 align="center">회원 정보 수정</h1>
+<hr>
+<form action="/member/detailMember" method="post">
+    <table align="center" border="1" width="700">
+        <tr>
+            <th bgcolor="orange" width="30%">아이디</th>
+            <td width="70%">
+                <input type="text" name="id" th:value="${member.id}" readonly>
+            </td>
+        </tr>
+        <tr>
+            <th bgcolor="orange">비밀번호</th>
+            <td>
+                <input type="password" name="pwd" th:value="${member.pwd}">
+            </td>
+        </tr>
+        <tr>
+            <th bgcolor="orange">이름</th>
+            <td>
+                <input type="text" name="name" th:value="${member.name}">
+            </td>
+        </tr>
+        <tr>
+            <th bgcolor="orange">이메일</th>
+            <td>
+                <input type="email" name="email" th:value="${member.email}">
+            </td>
+        </tr>
+        <tr>
+            <th bgcolor="orange">가입일자</th>
+            <td th:text="${member.joinDate}" readonly></td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center">
+                <input type="submit" value="정보수정">
+                <a href="/member/memberList">멤버목록보기</a>
+				<a href="/member/delMemberForm">회원탈퇴</a>
+            </td>
+        </tr>
+    </table>
+</form>
+</div>
+</body>
+</html>
